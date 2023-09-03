@@ -27,13 +27,15 @@ module.exports.updateUser = (req, res, next) => {
   )
     .then((user) => res.status(OK_STATUS_CODE).send(user))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.code === 11000) {
+        next(new DuplicateError('Пользователь с таким email уже существует'));
+      } else if (err.name === 'CastError') {
         next(new BadRequestError('Введены некорректные данные'));
-      }
-      if (err.name === 'ValidationError') {
+      } else if (err.name === 'ValidationError') {
         next(new BadRequestError('Введены некорректные данные'));
+      } else {
+        next(err);
       }
-      next(new ServerError('На сервере произошла ошибка'));
     });
 };
 
@@ -73,14 +75,13 @@ module.exports.createUser = (req, res, next) => {
         .catch((err) => {
           if (err.code === 11000) {
             next(new DuplicateError('Пользователь с таким email уже существует'));
-          }
-          if (err.name === 'CastError') {
+          } else if (err.name === 'CastError') {
             next(new NotFoundError('Пользователь не найден'));
-          }
-          if (err.name === 'ValidationError') {
+          } else if (err.name === 'ValidationError') {
             next(new BadRequestError('Введены некорректные данные'));
+          } else {
+            next(err);
           }
-          next(new ServerError('На сервере произошла ошибка'));
         });
     }).catch(next);
 };

@@ -9,7 +9,8 @@ const BadRequestError = require('../errors/bad-request-err');
 const ForbiddenError = require('../errors/forbidden-action-err');
 
 module.exports.getMovies = (req, res, next) => {
-  Movie.find({})
+  const owner = req.user._id;
+  Movie.find({ owner })
     .then((movies) => {
       res.send(movies);
     })
@@ -26,7 +27,7 @@ module.exports.addMovie = (req, res, next) => {
     year,
     description,
     image,
-    trailer,
+    trailerLink,
     nameRU,
     nameEN,
     thumbnail,
@@ -40,7 +41,7 @@ module.exports.addMovie = (req, res, next) => {
     year,
     description,
     image,
-    trailer,
+    trailerLink,
     nameRU,
     nameEN,
     thumbnail,
@@ -57,6 +58,7 @@ module.exports.addMovie = (req, res, next) => {
 };
 
 module.exports.deleteAimMovie = (req, res, next) => {
+  console.log(req.params.movieId);
   Movie.findById(req.params.movieId)
     .orFail()
     .then((movie) => {
@@ -71,13 +73,11 @@ module.exports.deleteAimMovie = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Фильм не найден'));
-      } if (err.name === 'DocumentNotFoundError') {
+      } else if (err.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Фильма не существует'));
+      } else {
+        next(err);
       }
-      if (err.message === 'Попытка удаления фильма другого пользователя') {
-        next(new ForbiddenError('Попытка удаления фильма другого пользователя'));
-      }
-      next(new ServerError('На сервере произошла ошибка'));
     });
 };
 

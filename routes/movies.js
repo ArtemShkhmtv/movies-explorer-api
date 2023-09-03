@@ -12,17 +12,17 @@ const auth = require('../middlewares/auth');
 
 router.get('/movies', auth, getMovies);
 
-router.patch('/movies', auth, celebrate({
+router.post('/movies', auth, celebrate({
   body: Joi.object().keys({
-    country: Joi.string().min(2).max(30),
-    director: Joi.string().min(2).max(30),
+    country: Joi.string().required(),
+    director: Joi.string().required(),
     duration: Joi.number(),
     year: Joi.string().length(4),
-    description: Joi.string().min(2).max(30),
+    description: Joi.string().required(),
     image: Joi.string().pattern(regEx),
-    trailer: Joi.string().pattern(regEx),
-    nameRU: Joi.string().min(1).max(50),
-    nameEN: Joi.string().min(1).max(50),
+    trailerLink: Joi.string().pattern(regEx),
+    nameRU: Joi.string().required(),
+    nameEN: Joi.string().required(),
     thumbnail: Joi.string().pattern(regEx),
     movieId: Joi.string().alphanum(),
   }),
@@ -30,7 +30,7 @@ router.patch('/movies', auth, celebrate({
 
 router.delete('/movies/:movieId', auth, celebrate({
   params: Joi.object().keys({
-    movieId: Joi.string().alphanum(),
+    movieId: Joi.string().length(24).hex().required(),
   }),
 }), deleteAimMovie);
 
